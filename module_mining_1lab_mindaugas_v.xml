@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="module_mining_1lab_mindaugas_v" default="compile.module.mining_1lab_mindaugas_v">
+  <dirname property="module.mining_1lab_mindaugas_v.basedir" file="${ant.file.module_mining_1lab_mindaugas_v}"/>
+  
+  <property name="module.jdk.home.mining_1lab_mindaugas_v" value="${project.jdk.home}"/>
+  <property name="module.jdk.bin.mining_1lab_mindaugas_v" value="${project.jdk.bin}"/>
+  <property name="module.jdk.classpath.mining_1lab_mindaugas_v" value="${project.jdk.classpath}"/>
+  
+  <property name="compiler.args.mining_1lab_mindaugas_v" value="-encoding windows-1257 -source 1.7 ${compiler.args}"/>
+  
+  <property name="mining_1lab_mindaugas_v.output.dir" value="${module.mining_1lab_mindaugas_v.basedir}/out/production/Mining 1lab Mindaugas V"/>
+  <property name="mining_1lab_mindaugas_v.testoutput.dir" value="${module.mining_1lab_mindaugas_v.basedir}/out/test/Mining 1lab Mindaugas V"/>
+  
+  <path id="mining_1lab_mindaugas_v.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="mining_1lab_mindaugas_v.module.production.classpath">
+    <path refid="${module.jdk.classpath.mining_1lab_mindaugas_v}"/>
+    <path refid="library.org.apache.opennlp:opennlp-tools:1.6.0.classpath"/>
+  </path>
+  
+  <path id="mining_1lab_mindaugas_v.runtime.production.module.classpath">
+    <pathelement location="${mining_1lab_mindaugas_v.output.dir}"/>
+    <path refid="library.org.apache.opennlp:opennlp-tools:1.6.0.classpath"/>
+  </path>
+  
+  <path id="mining_1lab_mindaugas_v.module.classpath">
+    <path refid="${module.jdk.classpath.mining_1lab_mindaugas_v}"/>
+    <pathelement location="${mining_1lab_mindaugas_v.output.dir}"/>
+    <path refid="library.org.apache.opennlp:opennlp-tools:1.6.0.classpath"/>
+  </path>
+  
+  <path id="mining_1lab_mindaugas_v.runtime.module.classpath">
+    <pathelement location="${mining_1lab_mindaugas_v.testoutput.dir}"/>
+    <pathelement location="${mining_1lab_mindaugas_v.output.dir}"/>
+    <path refid="library.org.apache.opennlp:opennlp-tools:1.6.0.classpath"/>
+  </path>
+  
+  
+  <patternset id="excluded.from.module.mining_1lab_mindaugas_v">
+    <patternset refid="ignored.files"/>
+  </patternset>
+  
+  <patternset id="excluded.from.compilation.mining_1lab_mindaugas_v">
+    <patternset refid="excluded.from.module.mining_1lab_mindaugas_v"/>
+  </patternset>
+  
+  <path id="mining_1lab_mindaugas_v.module.sourcepath">
+    <dirset dir="${module.mining_1lab_mindaugas_v.basedir}">
+      <include name="src"/>
+    </dirset>
+  </path>
+  
+  
+  <target name="compile.module.mining_1lab_mindaugas_v" depends="compile.module.mining_1lab_mindaugas_v.production,compile.module.mining_1lab_mindaugas_v.tests" description="Compile module Mining 1lab Mindaugas V"/>
+  
+  <target name="compile.module.mining_1lab_mindaugas_v.production" depends="register.custom.compilers" description="Compile module Mining 1lab Mindaugas V; production classes">
+    <mkdir dir="${mining_1lab_mindaugas_v.output.dir}"/>
+    <javac2 destdir="${mining_1lab_mindaugas_v.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.mining_1lab_mindaugas_v}/javac">
+      <compilerarg line="${compiler.args.mining_1lab_mindaugas_v}"/>
+      <bootclasspath refid="mining_1lab_mindaugas_v.module.bootclasspath"/>
+      <classpath refid="mining_1lab_mindaugas_v.module.production.classpath"/>
+      <src refid="mining_1lab_mindaugas_v.module.sourcepath"/>
+      <patternset refid="excluded.from.compilation.mining_1lab_mindaugas_v"/>
+    </javac2>
+    
+    <copy todir="${mining_1lab_mindaugas_v.output.dir}">
+      <fileset dir="${module.mining_1lab_mindaugas_v.basedir}/src">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+    </copy>
+  </target>
+  
+  <target name="compile.module.mining_1lab_mindaugas_v.tests" depends="register.custom.compilers,compile.module.mining_1lab_mindaugas_v.production" description="compile module Mining 1lab Mindaugas V; test classes" unless="skip.tests"/>
+  
+  <target name="clean.module.mining_1lab_mindaugas_v" description="cleanup module">
+    <delete dir="${mining_1lab_mindaugas_v.output.dir}"/>
+    <delete dir="${mining_1lab_mindaugas_v.testoutput.dir}"/>
+  </target>
+</project>

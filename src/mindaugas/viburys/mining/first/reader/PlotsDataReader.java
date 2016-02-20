@@ -63,15 +63,20 @@ public class PlotsDataReader {
             line = br.readLine();
         }
 
-        for(int i = 0; i < count ; i++)
+        int i;
+        for( i = 0; i < count && line != null ; i++)
         {
-            ModelMovie movie  = readMovie(br);
-            if(movie.getPlots().size() > 1)
+            try {
+                ModelMovie movie = readMovie(br);
                 moviesList.add(movie);
-            System.out.println(movie.getName()+ "plot count :" + movie.getPlots().size()  );
-
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+         //   if(movie.getPlots().size() > 1)
+          //      moviesList.add(movie);
+          //  System.out.println(movie.getName()+ "plot count :" + movie.getPlots().size()  );
         }
-        moviesList.get(0);
+        System.out.println( "MOVIE COUNT :" + i);
     }
 
 
@@ -91,14 +96,11 @@ public class PlotsDataReader {
 
         movie.setName(line.replace(PREFIX_NAME,""));
 
-
-
         while(!line.contains(MOVIES_SEPERATOR)){
             line = br.readLine();
             ModelMoviePlot plot = readPlot(br);
             if(plot.getPlot() != null && !plot.getPlot().isEmpty())
                 movie.addModelMoviePlot(plot);
-
         }
 
         return movie;
@@ -150,5 +152,8 @@ public class PlotsDataReader {
     }
 
 
+    public List<ModelMovie> getMoviesList() {
+        return moviesList;
+    }
 
 }

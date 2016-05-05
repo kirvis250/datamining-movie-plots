@@ -7,7 +7,6 @@ import mindaugas.viburys.mining.first.models.ModelMovie;
 import mindaugas.viburys.mining.first.models.ModelRelation;
 import mindaugas.viburys.mining.first.reader.PlotsDataReader;
 import opennlp.tools.parser.Parse;
-import opennlp.tools.util.Sequence;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,7 +17,7 @@ import java.util.List;
  */
 public class MovieAnalyzer {
 
-    private static final int LOAD_COUNT = 50;
+    private  int mLoadCount = 100;
 
 
     private List<ModelCountable> mLocationsList = new ArrayList<>();
@@ -34,52 +33,92 @@ public class MovieAnalyzer {
     private SentenceParser mSentenceParser;
     private SentencePostTagger mSentencePostTagger;
 
-    public MovieAnalyzer() {
+    public MovieAnalyzer(int count) {
         mTokenSpliter = new TokenSpliter();
         mSentenceSpliter = new SentenceSpliter();
         mLocationsFinder = new LocationsFinder();
         mPersonsFinder = new PersonsFinder();
         mSentenceParser = new SentenceParser();
         mSentencePostTagger = new SentencePostTagger();
+        this.mLoadCount = count;
     }
 
-    public void start(){
+    public void start() {
 
         PlotsDataReader reader = new PlotsDataReader("../plot.list");
-        reader.readMovies(LOAD_COUNT);
+        reader.readMovies(mLoadCount);
         List<ModelMovie> movies = reader.getMoviesList();
-        System.out.println("Loaded " + LOAD_COUNT + " Movies");
+        System.out.println("Loaded " + mLoadCount + " Movies");
 
-        for(int i = 0; i < movies.size(); i++){
+        for (int i = 0; i < movies.size(); i++) {
             ModelMovie movie = movies.get(i);
-            System.out.println("ANALYZING: "+i +"/"+ LOAD_COUNT);
+            System.out.println("ANALYZING: " + i + "/" + mLoadCount);
             analyzeMovie(movie);
         }
+        printResults();
+    }
 
-        System.out.println("PRINTING: Locations list");
+
+    public void reset(){
+        mLocationsList = new ArrayList<>();
+        mNamesList = new ArrayList<>();
+        mActions = new ArrayList<>();
+        mRelations = new ArrayList<>();
+    }
+
+
+
+    public void printResults(){
+
+        System.out.println("10 most common locations");
         Collections.sort(mLocationsList, ModelCountable.AmountComparator);
         for(int i = 0; i < mLocationsList.size() && i < 10; i++){
-            System.out.println(mLocationsList.get(i).getString());
+            System.out.println(" -"+mLocationsList.get(i).getString());
         }
 
-        System.out.println("PRINTING: Names list");
+
+        System.out.println("10 most common persons");
         Collections.sort(mNamesList, ModelCountable.AmountComparator);
         for(int i = 0; i < mNamesList.size() && i < 10; i++){
-            System.out.println(mNamesList.get(i).getString());
+
+            String name = mNamesList.get(i).getName();
+
+            System.out.println(" -"+name);
+
+            System.out.println("   10 most related persons");
+            int aa = 0;
+            for(ModelCountable countable : get10MostRelatedPersons(name)){
+                System.out.println("    -"+countable.getName()+ ", " +countable.getCount() );
+                if(aa >=9){
+                    break;
+                }
+                aa++;
+            }
+
+            aa = 0;
+            System.out.println("   10 most common relations");
+            for(ModelCountable countable : get10MostCommonRelations(name)){
+                System.out.println("    -"+countable.getName()+ ", " +countable.getCount() );
+                if(aa >=9){
+                    break;
+                }
+                aa++;
+            }
+
+            aa = 0;
+            System.out.println("   10 most common actions");
+            for(ModelAction countable : get10MostCommonActions(name)){
+                System.out.println("    -"+countable.getAction()+ ", " +countable.getCount() );
+                if(aa >=9){
+                    break;
+                }
+                aa++;
+            }
+
+
         }
 
-        System.out.println("PRINTING: Actions");
-        Collections.sort(mActions, ModelAction.AmountComparator);
-        for(int i = 0; i < mActions.size() && i < 10; i++){
-            System.out.println(mActions.get(i).getString());
-        }
 
-
-        System.out.println("PRINTING: Relations");
-        Collections.sort(mRelations, ModelRelation.AmountComparator);
-        for(int i = 0; i < mRelations.size() && i < 10; i++){
-            System.out.println(mRelations.get(i).getString());
-        }
     }
 
 
@@ -94,6 +133,62 @@ public class MovieAnalyzer {
             }
         }
     }
+
+
+    public List<ModelCountable> get10MostRelatedPersons(String name){
+        List<ModelCountable> aa = new ArrayList<>();
+
+        for(int i = 0; i < mRelations.size(); i++){
+            if(mRelations.get(i).getPersonOne().equalsIgnoreCase(name)){
+                String ndName = mRelations.get(i).getPersonTwo();
+                int index = findElement(aa, ndName);
+                if(index != -1){
+                    aa.get(index).setCount( aa.get(index).getCount()+1);
+                } else {
+                    aa.add(new ModelCountable(ndName,1));
+                }
+            }
+        }
+        Collections.sort(aa,ModelCountable.AmountComparator);
+        return aa;
+    }
+
+
+
+    public List<ModelCountable> get10MostCommonRelations(String name){
+        List<ModelCountable> aa = new ArrayList<>();
+
+        for(int i = 0; i < mRelations.size(); i++){
+            if(mRelations.get(i).getPersonOne().equalsIgnoreCase(name)){
+                String ndName = mRelations.get(i).getRelation();
+                int index = findElement(aa, ndName);
+                if(index != -1){
+                    aa.get(index).setCount( aa.get(index).getCount()+1);
+                } else {
+                    aa.add(new ModelCountable(ndName,1));
+                }
+            }
+        }
+        Collections.sort(aa,ModelCountable.AmountComparator);
+        return aa;
+    }
+
+
+
+
+    public List<ModelAction> get10MostCommonActions(String name){
+        List<ModelAction> aa = new ArrayList<>();
+
+        for(int i = 0; i < mActions.size(); i++){
+            if(mActions.get(i).getPerson().equalsIgnoreCase(name)){
+                aa.add(mActions.get(i));
+            }
+        }
+        Collections.sort(aa,ModelAction.AmountComparator);
+        return aa;
+    }
+
+
 
 
     public void analyzeSentence(String sentence){
@@ -158,13 +253,11 @@ public class MovieAnalyzer {
     public  void getRelevants(Parse [] sequences, String[] names){
 
         for(int i = 0; i < sequences.length; i++){
-            // sequences[i].show();
-
             String firstName = null;
             String lastName = null;
             String actioncc = null;
 
-            sequences[i].show();
+            //sequences[i].show();
 
             for(Parse chil : sequences[i].getChildren()){
 
@@ -181,11 +274,12 @@ public class MovieAnalyzer {
                     Parse name = getNP(chil);
                     Parse action = getVP(chil);
 
-                    if(name != null &&  action != null) {
-                        actioncc = action.toString();
+                    if(name != null) {
                         lastName = name.toString();
-                    } else {
-                        return;
+                    }
+
+                    if( action != null) {
+                        actioncc = action.toString();
                     }
                 }
 
@@ -199,7 +293,39 @@ public class MovieAnalyzer {
             }
 
             if(firstName != null) {
-                firstName = firstName.replaceAll("[^A-Za-z0-9 ]", "");
+
+                boolean exists =false;
+                for(String aa : names){
+                    if (firstName.equalsIgnoreCase(aa)){
+                        exists =true;
+                        break;
+                    }
+                }
+
+                if(!exists) {
+                    firstName = null;
+                } else {
+                    firstName = firstName.replaceAll("[^A-Za-z0-9 ]", "");
+                }
+
+            }
+
+            if(lastName != null) {
+
+                boolean exists =false;
+                for(String aa : names){
+                    if (lastName.equalsIgnoreCase(aa)){
+                        exists =true;
+                        break;
+                    }
+                }
+
+                if(!exists) {
+                    lastName = null;
+                } else {
+                    lastName = lastName.replaceAll("[^A-Za-z0-9 ]", "");
+                }
+
             }
 
 
@@ -214,37 +340,7 @@ public class MovieAnalyzer {
 
 
             if(firstName != null && lastName != null && actioncc != null){
-
-                boolean exists =false;
-                for(String aa : names){
-                    if (firstName.contains(aa)){
-                        exists =true;
-                        break;
-                    }
-                }
-
-                if(!exists) {
-                    firstName = null;
-                }
-
-
-                exists =false;
-                for(String aa : names){
-                    if (lastName.contains(aa)){
-                        exists =true;
-                        break;
-                    }
-                }
-
-                if(!exists) {
-                    lastName = null;
-                }
-
-
-                if(firstName != null && lastName != null &&  actioncc != null) {
-                    mRelations.add(new ModelRelation(firstName, lastName, actioncc, 1));
-                }
-
+                mRelations.add(new ModelRelation(firstName, lastName, actioncc, 1));
             }
         }
     }

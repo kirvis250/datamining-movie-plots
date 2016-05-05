@@ -5,6 +5,7 @@ import opennlp.tools.doccat.DocumentCategorizerME;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -34,10 +35,37 @@ public class Categorizer {
     }
 
 
-    public String getCategory(String text) {
+    public ModelPlotCategory getCategory(String text) {
         double[] outcomes = myCategorizer.categorize(text);
         String category = myCategorizer.getBestCategory(outcomes);
-        return category;
+
+        return new ModelPlotCategory(category, getMax(outcomes), stripLine(text)) ;
     }
+
+
+    public double getMax(double[] outcomes){
+        double max = 0;
+        for(int i = 0; i < outcomes.length; i++){
+            if(outcomes[i] > max){
+                max = outcomes[i];
+            }
+        }
+        return max;
+    }
+
+
+    private String stripLine(String ss){
+        int lenght = ss.length();
+
+        if(lenght > 200){
+            return ss.substring(0,200)+"...";
+        } else {
+            return ss;
+        }
+
+    }
+
+
+
 
 }
